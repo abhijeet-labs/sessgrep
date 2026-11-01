@@ -14,6 +14,8 @@ export interface Session {
 export interface Adapter {
   tool: Tool;
   root(): string;
+  /** All directories to read (defaults to [root()]). */
+  roots?(): string[];
   /** Yield sessions whose source changed since `known` (key -> stamp). */
   scan(known: Map<string, number>): Iterable<Session>;
 }

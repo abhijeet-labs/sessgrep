@@ -44,6 +44,10 @@ Search is full-text (SQLite FTS5, stemmed, ranked by BM25); results are one line
 
 Override with `SESSGREP_CLAUDE_DIR`, `SESSGREP_CODEX_DIR`, `SESSGREP_CURSOR_DIR`, `SESSGREP_HOME`. A missing tool is skipped with a note. These are undocumented internal formats and can change; the Claude Code format is verified against current real logs, Codex and Cursor against fixtures built from the known layouts (please file an issue if your install differs).
 
+Multiple Claude accounts: sessgrep reads `~/.claude`, `$CLAUDE_CONFIG_DIR` and any `~/.claude-*` directory automatically. For other locations set `SESSGREP_CLAUDE_DIR` to a `:`-separated list of `projects` dirs. `sessgrep doctor` lists every directory it checks.
+
+**Privacy:** the index holds an unencrypted copy of your sessions (they may contain secrets), and `export` does not redact. Treat both like the originals.
+
 ## How it compares (honest version)
 
 | | sessgrep | [deja-vu](https://github.com/vshulcz/deja-vu) | [coding_agent_session_search](https://github.com/Dicklesworthstone/coding_agent_session_search) | [agent-sessions](https://github.com/jazzyalex/agent-sessions) |

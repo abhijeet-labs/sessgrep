@@ -37,7 +37,7 @@ function reindex(db: ReturnType<typeof open>, say: boolean) {
   const known = knownStamps(db);
   let n = 0;
   for (const a of adapters) {
-    if (!existsSync(a.root())) { if (say) console.error(`  ${a.tool}: not found (${a.root()}), skipped`); continue; }
+    if (!(a.roots?.() ?? [a.root()]).some(existsSync)) { if (say) console.error(`  ${a.tool}: not found (${a.root()}), skipped`); continue; }
     try {
       for (const s of a.scan(known)) { upsert(db, s); n++; }
     } catch (e) { console.error(`  ${a.tool}: could not read (${(e as Error).message}), skipped`); }
@@ -50,7 +50,7 @@ const short = (p: string) => p ? p.replace(process.env.HOME ?? '\0', '~') : '-';
 
 if (v.help || !cmd || cmd === 'help') { console.log(HELP); process.exit(0); }
 if (cmd === 'doctor') {
-  for (const a of adapters) console.log(`${a.tool.padEnd(7)} ${existsSync(a.root()) ? 'found    ' : 'not found'} ${a.root()}`);
+  for (const a of adapters) for (const r of a.roots?.() ?? [a.root()]) console.log(`${a.tool.padEnd(7)} ${existsSync(r) ? 'found    ' : 'not found'} ${r}`);
   console.log(`index   ${dataDir()}`);
   process.exit(0);
 }

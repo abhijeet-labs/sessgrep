@@ -1,8 +1,8 @@
 import { test, before } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
+import { join, resolve, delimiter } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { DatabaseSync } from 'node:sqlite';
 
@@ -86,4 +86,14 @@ test('sessions survive source deletion (index keeps history)', () => {
   run(['index']);
   const out = run(['search', 'webhook'], { SESSGREP_CLAUDE_DIR: '/nonexistent' });
   assert.match(out, /claude:11111111/);
+});
+test('two Claude config dirs (two accounts) are both indexed', () => {
+  const a = join(tmp, 'acctA', 'p'), b = join(tmp, 'acctB', 'p');
+  mkdirSync(a, { recursive: true }); mkdirSync(b, { recursive: true });
+  const line = (t) => JSON.stringify({ type: 'user', cwd: '/x', timestamp: '2026-01-01T00:00:00Z', message: { content: t } }) + '\n';
+  writeFileSync(join(a, 'aaaaaaaa-0000.jsonl'), line('zebrafish alpha'));
+  writeFileSync(join(b, 'bbbbbbbb-0000.jsonl'), line('zebrafish bravo'));
+  const env = { SESSGREP_HOME: join(tmp, 'idx2'), SESSGREP_CLAUDE_DIR: [join(tmp, 'acctA'), join(tmp, 'acctB')].map(d => join(d, 'p')).join(delimiter), SESSGREP_CODEX_DIR: '/nonexistent', SESSGREP_CURSOR_DIR: '/nonexistent' };
+  const out = run(['search', 'zebrafish'], env);
+  assert.match(out, /aaaaaaaa/); assert.match(out, /bbbbbbbb/);
 });

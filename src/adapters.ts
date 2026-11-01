@@ -1,5 +1,5 @@
 import { readdirSync, readFileSync, statSync, existsSync } from 'node:fs';
-import { join, basename } from 'node:path';
+import { join, basename, delimiter } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import { Adapter, Message, Session, home } from './types.js';
 
@@ -30,9 +30,18 @@ function claudeText(content: unknown): string {
 }
 export const claude: Adapter = {
   tool: 'claude',
-  root: () => process.env.SESSGREP_CLAUDE_DIR ?? join(home(), '.claude', 'projects'),
+  // Several accounts = several config dirs. SESSGREP_CLAUDE_DIR is a path list (':' on Unix);
+  // otherwise ~/.claude plus $CLAUDE_CONFIG_DIR (if set) plus any ~/.claude-* dir.
+  roots() {
+    if (process.env.SESSGREP_CLAUDE_DIR) return process.env.SESSGREP_CLAUDE_DIR.split(delimiter).filter(Boolean);
+    const cfg = [join(home(), '.claude')];
+    if (process.env.CLAUDE_CONFIG_DIR) cfg.push(process.env.CLAUDE_CONFIG_DIR);
+    try { for (const e of readdirSync(home(), { withFileTypes: true })) if (e.isDirectory() && /^\.claude-/.test(e.name)) cfg.push(join(home(), e.name)); } catch { /* no home */ }
+    return [...new Set(cfg)].map(c => join(c, 'projects'));
+  },
+  root() { return this.roots!().join(delimiter); },
   *scan(known) {
-    for (const file of walk(this.root(), '.jsonl')) {
+    for (const file of this.roots!().flatMap(r => [...walk(r, '.jsonl')])) {
       if (file.includes('/subagents/')) continue;
       const stamp = statSync(file).mtimeMs;
       const id = basename(file, '.jsonl');
