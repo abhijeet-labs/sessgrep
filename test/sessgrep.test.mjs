@@ -115,3 +115,8 @@ test('export/show redact secrets by default; --no-redact keeps them', () => {
   }
   assert.ok(run(['show', 'cccccccc', '--no-redact'], env).includes(sk));
 });
+test('codex newer layout (session_id, reasoning/function_call items) parses', () => {
+  const out = run(['search', 'quokkabridge', '--tool', 'codex']);
+  assert.match(out, /codex:33333333/);
+  assert.ok(!run(['show', '33333333']).includes('thinking'));
+});

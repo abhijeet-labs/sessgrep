@@ -1,0 +1,6 @@
+{"timestamp":"2026-10-31T09:00:00.000Z","type":"session_meta","payload":{"session_id":"33333333-cccc-4ccc-8ccc-333333333333","timestamp":"2026-10-31T09:00:00.000Z","cwd":"/home/dev/api","cli_version":"0.149.0","model_provider":"openai","git":{"branch":"main"}}}
+{"timestamp":"2026-10-31T09:00:01.000Z","type":"turn_context","payload":{"cwd":"/home/dev/api","model":"gpt-5"}}
+{"timestamp":"2026-10-31T09:00:02.000Z","type":"response_item","payload":{"type":"message","role":"user","content":[{"type":"input_text","text":"Why does the quokkabridge retry loop never back off?"}]}}
+{"timestamp":"2026-10-31T09:00:03.000Z","type":"response_item","payload":{"type":"reasoning","summary":[{"type":"summary_text","text":"thinking"}]}}
+{"timestamp":"2026-10-31T09:00:04.000Z","type":"response_item","payload":{"type":"function_call","name":"shell","call_id":"c1","arguments":"{}"}}
+{"timestamp":"2026-10-31T09:00:05.000Z","type":"response_item","payload":{"type":"message","role":"assistant","content":[{"type":"output_text","text":"The delay is reset on every attempt; keep it outside the loop."}]}}

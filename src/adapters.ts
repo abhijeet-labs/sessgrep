@@ -74,7 +74,7 @@ export const codex: Adapter = {
       let id = basename(file, '.jsonl').replace(/^rollout-/, '');
       const rows = jsonl(file);
       const meta = rows.find(r => r.type === 'session_meta')?.payload;
-      if (meta?.id) id = meta.id;
+      if (meta?.id ?? meta?.session_id) id = meta.id ?? meta.session_id;
       if (known.get(`codex:${id}`) === stamp) continue;
       const messages: Message[] = [];
       for (const r of rows) {
