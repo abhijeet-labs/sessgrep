@@ -1,5 +1,7 @@
 # sessgrep
 
+[![CI](https://github.com/abhijeet-labs/sessgrep/actions/workflows/ci.yml/badge.svg)](https://github.com/abhijeet-labs/sessgrep/actions/workflows/ci.yml)
+
 Search every past AI coding session (Claude Code, Codex, Cursor) from one command, and paste any of them back into any agent as clean markdown.
 
 - **Local only.** No network code, no telemetry, no accounts. Read-only on your agent logs.
