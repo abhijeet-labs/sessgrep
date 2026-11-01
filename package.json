@@ -1,0 +1,16 @@
+{
+  "name": "sessgrep",
+  "version": "0.1.0",
+  "description": "Search and reuse past AI coding sessions across Claude Code, Codex and Cursor. Local only, zero dependencies.",
+  "license": "MIT",
+  "type": "module",
+  "bin": { "sessgrep": "dist/cli.js" },
+  "files": ["dist", "README.md", "LICENSE"],
+  "engines": { "node": ">=22.13" },
+  "scripts": {
+    "build": "tsc",
+    "test": "tsc && node --test test/*.test.mjs",
+    "prepublishOnly": "npm run build"
+  },
+  "devDependencies": { "@types/node": "^24.0.0", "typescript": "^5.6.0" }
+}
