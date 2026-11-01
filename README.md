@@ -7,7 +7,9 @@ Search every past AI coding session (Claude Code, Codex, Cursor) from one comman
 - **Zero dependencies.** ~400 lines of TypeScript on Node's built-in SQLite (FTS5). Read all of it in ten minutes.
 - **Keeps history.** Claude Code prunes old logs; sessgrep keeps what it has already indexed.
 
-> Demo GIF: _TODO before launch (record with `vhs demo.tape`)._
+![sessgrep demo: index, search, export](docs/demo.gif)
+
+<sub>Demo uses synthetic sessions only. Source: `docs/demo.cast` (asciicast, rendered with agg).</sub>
 
 ## Install
 
