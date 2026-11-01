@@ -4,7 +4,7 @@ Search every past AI coding session (Claude Code, Codex, Cursor) from one comman
 
 - **Local only.** No network code, no telemetry, no accounts. Read-only on your agent logs.
 - **Touches nothing.** No hooks, no MCP server, no edits to your agent configs. Delete the index and nothing changed.
-- **Zero dependencies.** ~500 lines of TypeScript on Node's built-in SQLite (FTS5). Read all of it in ten minutes.
+- **Zero dependencies.** ~400 lines of TypeScript on Node's built-in SQLite (FTS5). Read all of it in ten minutes.
 - **Keeps history.** Claude Code prunes old logs; sessgrep keeps what it has already indexed.
 
 > Demo GIF: _TODO before launch (record with `vhs demo.tape`)._
@@ -52,7 +52,7 @@ Override with `SESSGREP_CLAUDE_DIR`, `SESSGREP_CODEX_DIR`, `SESSGREP_CURSOR_DIR`
 | Platform | anywhere Node runs | macOS/Linux (Windows less tested) | CLI + TUI | macOS app only |
 | Installs hooks / MCP / config into your agents | **no** | yes (optional) | no | no |
 | Resume / handoff / sync / semantic search | no | yes | hybrid search | resume |
-| Size | ~500 lines, 0 deps | large | large (Rust) | native app |
+| Size | ~400 lines, 0 deps | large | large (Rust) | native app |
 
 If you want the full-featured memory layer for many agents, **use deja-vu**: it does far more. Switch to sessgrep if you want the smallest thing that does search + export for the big three, that you can audit in one sitting and that never touches your agent setup.
 
