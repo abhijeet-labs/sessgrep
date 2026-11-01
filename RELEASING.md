@@ -4,6 +4,8 @@
 
 ## Pre-flight (all must pass)
 
+> **`gh` CLI:** not installed on the build host (installing it is a system change, so we did not). Every step below uses plain `git`/`npm`, except the visibility flip and release, which the founder can run by hand with `gh` or via GitHub Settings > Danger Zone > Change visibility.
+
 ```sh
 git checkout main && git pull --ff-only
 git status -s                                   # empty
