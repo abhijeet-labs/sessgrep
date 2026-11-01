@@ -42,11 +42,13 @@ Search is full-text (SQLite FTS5, stemmed, ranked by BM25); results are one line
 | Codex | `~/.codex/sessions/YYYY/MM/DD/rollout-*.jsonl` | JSONL; `session_meta` + `response_item` messages; injected `<environment_context>` skipped |
 | Cursor | `state.vscdb` in Cursor's `globalStorage` (`~/.config/Cursor/User/...` Linux, `~/Library/Application Support/Cursor/User/...` macOS, `%APPDATA%\Cursor\User\...` Windows) | SQLite `cursorDiskKV`: `composerData:<id>` + `bubbleId:<id>:<bubble>`; project from `workspaceStorage` |
 
-Override with `SESSGREP_CLAUDE_DIR`, `SESSGREP_CODEX_DIR`, `SESSGREP_CURSOR_DIR`, `SESSGREP_HOME`. A missing tool is skipped with a note. These are undocumented internal formats and can change; the Claude Code format is verified against current real logs, Codex and Cursor against fixtures built from the known layouts (please file an issue if your install differs).
+Override with `SESSGREP_CLAUDE_DIR`, `SESSGREP_CODEX_DIR`, `SESSGREP_CURSOR_DIR`, `SESSGREP_HOME`. A missing tool is skipped with a note. These are undocumented internal formats and can change.
+
+**Status:** Claude Code support is verified against real logs (including multiple accounts). **Codex and Cursor support is experimental**: tested on fixtures only, not yet on real installs. If a parser fails, please open an issue with the output of `sessgrep doctor`.
 
 Multiple Claude accounts: sessgrep reads `~/.claude`, `$CLAUDE_CONFIG_DIR` and any `~/.claude-*` directory automatically. For other locations set `SESSGREP_CLAUDE_DIR` to a `:`-separated list of `projects` dirs. `sessgrep doctor` lists every directory it checks.
 
-**Privacy:** the index holds an unencrypted copy of your sessions (they may contain secrets), and `export` does not redact. Treat both like the originals.
+**Privacy:** the index holds an unencrypted copy of your sessions (they may contain secrets); treat it like the originals. `show` and `export` mask common secrets by default (API keys, GitHub/AWS/Slack tokens, JWTs, private keys, `KEY=value` lines for secret-looking names; `--no-redact` to disable). Masking is best-effort, so review before sharing.
 
 ## How it compares (honest version)
 
