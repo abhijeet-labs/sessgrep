@@ -4,6 +4,7 @@ import { existsSync } from 'node:fs';
 import { adapters } from './adapters.js';
 import { open, knownStamps, upsert, search, find, list, dataDir, Filters } from './db.js';
 import { toMarkdown } from './export.js';
+import { redact } from './redact.js';
 import { Tool } from './types.js';
 
 const HELP = `sessgrep: search past AI coding sessions (Claude Code, Codex, Cursor). Local only.
@@ -17,6 +18,8 @@ const HELP = `sessgrep: search past AI coding sessions (Claude Code, Codex, Curs
   sessgrep doctor                     where each tool's logs were looked for
 
 Filters: --tool claude|codex|cursor  --project <substring>  --since YYYY-MM-DD  --until YYYY-MM-DD  --limit N
+show/export: secrets (API keys, tokens, JWTs, private keys, KEY=value) are masked by default; --no-redact to keep them.
+            Masking is best-effort, review before sharing.
 Search:  --raw  treat the query as FTS5 syntax (AND/OR/NEAR/prefix*)
 Env: SESSGREP_HOME, SESSGREP_CLAUDE_DIR, SESSGREP_CODEX_DIR, SESSGREP_CURSOR_DIR`;
 
@@ -24,7 +27,7 @@ const { values: v, positionals: pos } = parseArgs({
   allowPositionals: true,
   options: {
     tool: { type: 'string' }, project: { type: 'string' }, since: { type: 'string' }, until: { type: 'string' },
-    limit: { type: 'string' }, raw: { type: 'boolean' }, 'max-chars': { type: 'string' }, o: { type: 'string', short: 'o' },
+    limit: { type: 'string' }, raw: { type: 'boolean' }, 'no-redact': { type: 'boolean' }, 'max-chars': { type: 'string' }, o: { type: 'string', short: 'o' },
     help: { type: 'boolean', short: 'h' }, quiet: { type: 'boolean', short: 'q' },
   },
 });
@@ -50,7 +53,7 @@ const short = (p: string) => p ? p.replace(process.env.HOME ?? '\0', '~') : '-';
 
 if (v.help || !cmd || cmd === 'help') { console.log(HELP); process.exit(0); }
 if (cmd === 'doctor') {
-  for (const a of adapters) for (const r of a.roots?.() ?? [a.root()]) console.log(`${a.tool.padEnd(7)} ${existsSync(r) ? 'found    ' : 'not found'} ${r}`);
+  for (const a of adapters) for (const r of a.roots?.() ?? [a.root()]) console.log(`${(a.tool + (a.tool === 'claude' ? '' : ' (experimental)')).padEnd(20)} ${existsSync(r) ? 'found    ' : 'not found'} ${r}`);
   console.log(`index   ${dataDir()}`);
   process.exit(0);
 }
@@ -75,7 +78,8 @@ try {
     if (!rest[0]) die(`usage: sessgrep ${cmd} <id>`);
     reindex(db, false);
     const { s, messages } = find(db, rest[0]);
-    const md = toMarkdown(s, messages, cmd === 'export' && v['max-chars'] ? Number(v['max-chars']) : 0);
+    let md = toMarkdown(s, messages, cmd === 'export' && v['max-chars'] ? Number(v['max-chars']) : 0);
+    if (!v['no-redact']) md = redact(md);
     if (v.o) { (await import('node:fs')).writeFileSync(v.o, md); console.error(`wrote ${v.o}`); } else process.stdout.write(md + '\n');
   } else die(HELP);
 } catch (e) { die((e as Error).message); }

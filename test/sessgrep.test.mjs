@@ -97,3 +97,21 @@ test('two Claude config dirs (two accounts) are both indexed', () => {
   const out = run(['search', 'zebrafish'], env);
   assert.match(out, /aaaaaaaa/); assert.match(out, /bbbbbbbb/);
 });
+test('export/show redact secrets by default; --no-redact keeps them', () => {
+  const d = join(tmp, 'sec', 'p'); mkdirSync(d, { recursive: true });
+  // built at runtime so the repo never contains token-shaped strings
+  const sk = 'sk-' + 'a1B2c3D4e5F6g7H8i9J0k1L2';
+  const gh = 'ghp_' + 'A1b2C3d4E5f6G7h8I9j0K1l2M3n4O5p6Q7r8';
+  const aws = 'AKIA' + 'ABCDEFGHIJKLMNOP';
+  const jwt = 'eyJ' + 'hbGciOiJIUzI1NiJ9.eyJ' + 'zdWIiOiIxMjM0NTY3ODkwIn0.abcdefghijk12345';
+  const text = `deploy gherkin with ${sk} and ${gh} ${aws} ${jwt}\nDATABASE_PASSWORD=hunter2hunter2\nPORT=3000`;
+  writeFileSync(join(d, 'cccccccc-0000.jsonl'), JSON.stringify({ type: 'user', cwd: '/x', timestamp: '2026-01-01T00:00:00Z', message: { content: text } }) + '\n');
+  const env = { SESSGREP_HOME: join(tmp, 'idx3'), SESSGREP_CLAUDE_DIR: join(tmp, 'sec', 'p'), SESSGREP_CODEX_DIR: '/nonexistent', SESSGREP_CURSOR_DIR: '/nonexistent' };
+  for (const cmd of ['show', 'export']) {
+    const out = run([cmd, 'cccccccc'], env);
+    for (const s of [sk, gh, aws, jwt, 'hunter2hunter2']) assert.ok(!out.includes(s), `${cmd} leaked ${s.slice(0, 6)}`);
+    assert.match(out, /PORT=3000/);
+    assert.match(out, /REDACTED/);
+  }
+  assert.ok(run(['show', 'cccccccc', '--no-redact'], env).includes(sk));
+});
