@@ -1,9 +1,9 @@
 import { test, before } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, mkdirSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve, delimiter } from 'node:path';
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { DatabaseSync } from 'node:sqlite';
 
 const fx = resolve('test/fixtures');
@@ -119,4 +119,18 @@ test('codex newer layout (session_id, reasoning/function_call items) parses', ()
   const out = run(['search', 'quokkabridge', '--tool', 'codex']);
   assert.match(out, /codex:33333333/);
   assert.ok(!run(['show', '33333333']).includes('thinking'));
+});
+
+test('--version / -v print the package version', () => {
+  const want = JSON.parse(readFileSync('package.json', 'utf8')).version;
+  for (const f of ['--version', '-v']) assert.equal(run([f]).trim(), want);
+});
+
+test('unknown flag: one-line error, exit 1, no stack trace', () => {
+  const r = spawnSync('node', ['dist/cli.js', '--bogus'], { encoding: 'utf8' });
+  assert.equal(r.status, 1);
+  assert.match(r.stderr, /unknown option '--bogus'/i);
+  assert.match(r.stderr, /--help/);
+  assert.equal(r.stderr.trim().split('\n').length, 1);
+  assert.doesNotMatch(r.stderr, /\n\s+at /);
 });
