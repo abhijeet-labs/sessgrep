@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { parseArgs } from 'node:util';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { adapters } from './adapters.js';
 import { open, knownStamps, upsert, search, find, list, dataDir, Filters } from './db.js';
 import { toMarkdown } from './export.js';
@@ -15,6 +15,7 @@ const HELP = `sessgrep: search past AI coding sessions (Claude Code, Codex, Curs
   sessgrep show <id>                  print a session (id or unique prefix; tool:id also works)
   sessgrep export <id> [--max-chars N] [-o file]
                                       clean markdown to paste into any agent (keeps newest turns if capped)
+  sessgrep --version                  print the version
   sessgrep doctor                     where each tool's logs were looked for
 
 Filters: --tool claude|codex|cursor  --project <substring>  --since YYYY-MM-DD  --until YYYY-MM-DD  --limit N
@@ -23,14 +24,21 @@ show/export: secrets (API keys, tokens, JWTs, private keys, KEY=value) are maske
 Search:  --raw  treat the query as FTS5 syntax (AND/OR/NEAR/prefix*)
 Env: SESSGREP_HOME, SESSGREP_CLAUDE_DIR, SESSGREP_CODEX_DIR, SESSGREP_CURSOR_DIR`;
 
-const { values: v, positionals: pos } = parseArgs({
+function parse() {
+  try { return parseArgs({
   allowPositionals: true,
   options: {
     tool: { type: 'string' }, project: { type: 'string' }, since: { type: 'string' }, until: { type: 'string' },
     limit: { type: 'string' }, raw: { type: 'boolean' }, 'no-redact': { type: 'boolean' }, 'max-chars': { type: 'string' }, o: { type: 'string', short: 'o' },
-    help: { type: 'boolean', short: 'h' }, quiet: { type: 'boolean', short: 'q' },
+    help: { type: 'boolean', short: 'h' }, quiet: { type: 'boolean', short: 'q' }, version: { type: 'boolean', short: 'v' },
   },
-});
+  }); } catch (e) {
+    const m = (e as { code?: string }).code?.startsWith('ERR_PARSE_ARGS') ? (e as Error).message.split('.')[0] : (e as Error).message;
+    console.error(`sessgrep: ${m}. Try 'sessgrep --help'.`);
+    process.exit(1);
+  }
+}
+const { values: v, positionals: pos } = parse();
 const [cmd, ...rest] = pos;
 const filters: Filters = { tool: v.tool as Tool | undefined, project: v.project, since: v.since, until: v.until, limit: v.limit ? Number(v.limit) : undefined };
 
@@ -51,6 +59,7 @@ function reindex(db: ReturnType<typeof open>, say: boolean) {
 const when = (s: string) => s ? s.slice(0, 10) : '????-??-??';
 const short = (p: string) => p ? p.replace(process.env.HOME ?? '\0', '~') : '-';
 
+if (v.version) { console.log(JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8')).version); process.exit(0); }
 if (v.help || !cmd || cmd === 'help') { console.log(HELP); process.exit(0); }
 if (cmd === 'doctor') {
   for (const a of adapters) for (const r of a.roots?.() ?? [a.root()]) console.log(`${(a.tool + (a.tool === 'claude' ? '' : ' (experimental)')).padEnd(20)} ${existsSync(r) ? 'found    ' : 'not found'} ${r}`);

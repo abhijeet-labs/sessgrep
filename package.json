@@ -1,6 +1,6 @@
 {
   "name": "sessgrep",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Search and reuse past AI coding sessions across Claude Code, Codex and Cursor. Local only, zero dependencies.",
   "license": "MIT",
   "type": "module",
